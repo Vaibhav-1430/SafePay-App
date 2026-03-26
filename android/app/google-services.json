@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "366629806731",
+    "project_id": "safepay-28ea2",
+    "storage_bucket": "safepay-28ea2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:366629806731:android:0dad4b76fc7be56089ea8e",
+        "android_client_info": {
+          "package_name": "com.safepay.safepay"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "366629806731-138b3vj5rd515etopln5bvuid5hnsr91.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.safepay.safepay",
+            "certificate_hash": "2b4642cc8548cb786a5c8ab223a586e162fa2d1b"
+          }
+        },
+        {
+          "client_id": "366629806731-k46ea03ngsegg340uk9litj2inht6q8g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.safepay.safepay",
+            "certificate_hash": "3732096f2380606fffd4265d1a4768102804c84d"
+          }
+        },
+        {
+          "client_id": "366629806731-4ib7k2s7f7mnh47ohaqelir4s039lvmd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEU2uG77AbIRQQ-hMLmKcqwX35B1nF8iw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "366629806731-4ib7k2s7f7mnh47ohaqelir4s039lvmd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "366629806731-o80o76tvrhn52pf08da5v1vv46tqsgtn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.safepay.safepay"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

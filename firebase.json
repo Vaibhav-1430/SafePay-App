@@ -1,0 +1,43 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "safepay-28ea2",
+          "appId": "1:366629806731:android:0dad4b76fc7be56089ea8e",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "safepay-28ea2",
+          "configurations": {
+            "android": "1:366629806731:android:0dad4b76fc7be56089ea8e",
+            "ios": "1:366629806731:ios:74dd367f3499e97789ea8e",
+            "macos": "1:366629806731:ios:74dd367f3499e97789ea8e",
+            "web": "1:366629806731:web:e3b627e34021052e89ea8e",
+            "windows": "1:366629806731:web:8fb782609528ca5189ea8e"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "safepay-functions",
+      "ignore": [
+        "node_modules",
+        ".git"
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: safepay-ai-backend
+    env: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    rootDir: ai-backend
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MOBILE_API_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false

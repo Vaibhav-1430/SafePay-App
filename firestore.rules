@@ -1,0 +1,180 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function userFieldsAllowedOnWrite() {
+      return request.resource.data.keys().hasOnly([
+        'uid',
+        'name',
+        'email',
+        'phone',
+        'phoneNumber',
+        'phoneNormalized',
+        'userType',
+        'upiId',
+        'profileImageUrl',
+        'createdAt',
+        'updatedAt',
+        'businessName',
+        'merchantType',
+        'notificationsEnabled',
+        'fcmToken',
+        'fcmTokens',
+        'deviceToken',
+        'fcmTokenUpdatedAt',
+        'deviceBinding',
+        'upiPinHash',
+        'pinHash',
+        'upiPinCreatedAt',
+        'upiPinLength',
+        'appPinHash',
+        'appPinSet',
+        'appPinCreatedAt',
+        'reputationScore',
+        'isVerified'
+      ]);
+    }
+
+    function userNameValid() {
+      return request.resource.data.name is string &&
+        request.resource.data.name.size() >= 3 &&
+        request.resource.data.name.size() <= 60;
+    }
+
+    function userPhoneValid() {
+      return request.resource.data.phone is string &&
+        request.resource.data.phone.matches('^[0-9]{10}$');
+    }
+
+    function userUpiIdValid() {
+      return request.resource.data.upiId is string &&
+        request.resource.data.upiId.matches('^[a-z0-9][a-z0-9._-]{1,30}@[a-z]{2,}$');
+    }
+
+    function hasRequiredTransactionFields(data) {
+      return data.keys().hasAll([
+        'senderId',
+        'receiverId',
+        'amount',
+        'status',
+        'createdAt'
+      ]);
+    }
+
+    function validTransactionStatus(status) {
+      return status in ['pending', 'approved', 'rejected', 'completed', 'refunded', 'timedOut'];
+    }
+
+    function hasRequiredPaymentRequestFields(data) {
+      return data.keys().hasAll([
+        'senderId',
+        'receiverId',
+        'amount',
+        'status',
+        'createdAt',
+        'transactionId'
+      ]);
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && userFieldsAllowedOnWrite() && userNameValid() && userPhoneValid() && userUpiIdValid();
+      allow update: if isOwner(userId) && userFieldsAllowedOnWrite() && userNameValid() && userPhoneValid() && userUpiIdValid();
+      allow delete: if false;
+    }
+
+    match /user_phone_index/{phoneId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+      allow delete: if false;
+    }
+
+    match /wallets/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId);
+      // Wallet updates are owner-only from client.
+      // Cross-user balance mutations must happen through trusted Cloud Functions.
+      allow update: if isOwner(userId);
+      allow delete: if false;
+    }
+
+    match /transactions/{transactionId} {
+      allow read: if isAuthenticated() &&
+        (resource.data.senderId == request.auth.uid ||
+         resource.data.receiverId == request.auth.uid);
+      allow create: if isAuthenticated() &&
+        request.resource.data.senderId == request.auth.uid &&
+        hasRequiredTransactionFields(request.resource.data) &&
+        validTransactionStatus(request.resource.data.status) &&
+        request.resource.data.amount is number &&
+        request.resource.data.amount > 0 &&
+        request.resource.data.createdAt is timestamp;
+      // Payment status transitions are backend-authoritative (Cloud Functions/Admin SDK).
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    match /payment_requests/{requestId} {
+      allow read: if isAuthenticated() &&
+        (resource.data.senderId == request.auth.uid ||
+         resource.data.receiverId == request.auth.uid);
+      allow create: if isAuthenticated() &&
+        request.resource.data.senderId == request.auth.uid &&
+        hasRequiredPaymentRequestFields(request.resource.data) &&
+        request.resource.data.status == 'pending' &&
+        request.resource.data.amount is number &&
+        request.resource.data.amount > 0 &&
+        request.resource.data.createdAt is timestamp;
+      // Payment request state is backend-authoritative (Cloud Functions/Admin SDK).
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    match /transaction_logs/{logId} {
+      allow read: if isAuthenticated() &&
+        (resource.data.senderId == request.auth.uid ||
+         resource.data.receiverId == request.auth.uid);
+      allow create, update, delete: if false;
+    }
+
+    match /trusted_contacts/{contactId} {
+      allow read: if isAuthenticated() && resource.data.ownerUserId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.ownerUserId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.ownerUserId == request.auth.uid;
+      allow update: if false;
+    }
+
+    match /merchant_settings/{merchantId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(merchantId);
+    }
+
+    match /notifications/{notifId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId is string &&
+        request.resource.data.keys().hasAll(['userId', 'title', 'body', 'type', 'isRead', 'createdAt']) &&
+        request.resource.data.createdAt is timestamp;
+      allow update: if isAuthenticated() &&
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.diff(resource.data).changedKeys().hasOnly(['isRead']);
+      allow delete: if false;
+    }
+
+    match /idempotency_keys/{keyId} {
+      allow read, write: if false;
+    }
+
+    match /system/{docId} {
+      allow read, write: if false;
+    }
+  }
+}
